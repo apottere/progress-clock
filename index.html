@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>00:00</title>
+    <style>
+        :root {
+            --seconds-progress: 0;
+            --minutes-progress: 0;
+            --hours-progress: 0;
+        }
+        html {
+            background-color: #353535;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+        #lv-container {
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100lvh;
+            width: 100lvw;
+        }
+        #sv-container {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100svh;
+            width: 100svw;
+        }
+        #clock {
+            font-family: monospace, sans-serif;
+            font-size: 18vmin;
+            font-weight: 300;
+            color: #e3e3e3;
+        }
+        #animation {
+            position: absolute;
+            height: 100svh;
+            width: 100svw;
+            z-index: -1;
+        }
+        #seconds-circle {
+            stroke: #2ecc71;
+            stroke-dasharray: 100;
+            stroke-dashoffset: calc(100 - var(--seconds-progress));
+        }
+        #minutes-circle {
+            stroke: #3498db;
+            stroke-dasharray: 100;
+            stroke-dashoffset: calc(100 - var(--minutes-progress));
+        }
+        #hours-circle {
+            stroke: #9b59b6;
+            stroke-dasharray: 100;
+            stroke-dashoffset: calc(100 - var(--hours-progress));
+        }
+    </style>
+</head>
+<body>
+<div id="lv-container">
+    <div id="sv-container">
+        <div id="clock">00:00</div>
+        <svg id="animation" viewBox="0 0 100 100">
+            <!-- cardinal directions-->
+            <line x1="50" y1="8.5" x2="50" y2="1.5" stroke="#e3e3e3" stroke-width="0.2" />
+            <line x1="50" y1="98.5" x2="50" y2="91.5" stroke="#e3e3e3" stroke-width="0.2" />
+            <line x1="8.5" y1="50" x2="1.5" y2="50" stroke="#e3e3e3" stroke-width="0.2" />
+            <line x1="98.5" y1="50" x2="91.5" y2="50" stroke="#e3e3e3" stroke-width="0.2" />
+            <!-- diagonals TODO -->
+
+            <g transform="rotate(-90 50 50)">
+                <circle id="hours-circle" cx="50" cy="50" r="47" stroke-width="1.5" fill="none" pathLength="100" />
+                <circle id="minutes-circle" cx="50" cy="50" r="45" stroke-width="1.5" fill="none" pathLength="100" />
+                <circle id="seconds-circle" cx="50" cy="50" r="43" stroke-width="1.5" fill="none" pathLength="100" />
+            </g>
+        </svg>
+    </div>
+</div>
+<script>
+    const clock = document.getElementById('clock');
+
+    function updateClock() {
+        const now = new Date();
+        const milliseconds = now.getMilliseconds();
+        const seconds = now.getSeconds();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const twelveHours = hours % 12;
+        const hoursForClock = twelveHours === 0 ? 12 : twelveHours;
+        const time = `${hoursForClock}:${minutes < 10 ? '0' : ''}${minutes}`;
+
+        document.title = time;
+        if (clock) {
+            clock.textContent = time;
+        }
+
+        const millisecondsRatio = milliseconds / 1000;
+        const secondsRatio = (millisecondsRatio + seconds) / 60;
+        const minutesRatio = (secondsRatio + minutes) / 60;
+        const hoursRatio = (minutesRatio + (hours % 12)) / 12;
+
+        document.documentElement.style.setProperty("--seconds-progress", (secondsRatio * 100).toString());
+        document.documentElement.style.setProperty("--minutes-progress", (minutesRatio * 100).toString());
+        document.documentElement.style.setProperty("--hours-progress", (hoursRatio * 100).toString());
+    }
+
+    requestAnimationFrame(function update() {
+        updateClock();
+        requestAnimationFrame(update);
+    });
+</script>
+</body>
+</html>
